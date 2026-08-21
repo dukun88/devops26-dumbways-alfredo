@@ -1,4 +1,4 @@
-#Task 1
+# Task 1
 ## Konsep DevOps
 DevOps adalah gabungan dari kultur kerja, praktik, dan tools yang menyatukan tim pengembang (Development) dan tim operasional (Operations).
 ##  Langkah Instalasi Ubuntu Server 22.04 LTS (VirtualBox) & Konfigurasi IP Static (.208)
