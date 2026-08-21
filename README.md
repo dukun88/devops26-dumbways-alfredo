@@ -76,3 +76,22 @@ Setelah server menyala kembali dan Anda berhasil login menggunakan *username* & 
 Jalankan perintah:
 ```bash
 ip a
+```
+> Pastikan interface jaringan menampilkan IP **`192.168.1.208`** (atau sesuai segmen `xxx.xxx.xxx.208`).
+
+---
+
+### 2. Pengujian Koneksi Internet (Ping)
+Jalankan perintah pengujian koneksi:
+
+* **Test IP Google:**
+  ```bash
+  ping -c 4 8.8.8.8
+  ```
+  *Output yang diharapkan:* `0% packet loss` dan menerima balasan `ICMP reply`.
+
+* **Test Domain / DNS:**
+  ```bash
+  ping -c 4 google.com
+  ```
+  *Output yang diharapkan:* Server mampu menyelesaikan nama domain `google.com` ke IP address dan menerima balasan paket.
