@@ -465,3 +465,162 @@ Berikut cara melihat riwayat dan detail perubahan isi file di GitHub:
 1. Buka file yang dituju (misal: `config.txt`).
 2. Klik tombol **Blame**.
 3. GitHub akan menampilkan siapa yang menulis setiap baris kode, kapan perubahan dilakukan, beserta id commit terkait.
+
+# Task 5
+## 📋 Ringkasan Deployment & Port
+
+| Aplikasi | Runtime / Framework | Port | Deskripsi / Output | Status UFW |
+| :--- | :--- | :--- | :--- | :--- |
+| **Wayshub Frontend** | NodeJS (v12 / NVM) | `3000` | Aplikasi Frontend Wayshub | `ALLOW` |
+| **Python Web App** | Python 3 (Flask) | `5000` | Menampilkan Teks: Nama Anda | `ALLOW` |
+| **Golang Web App** | Go (Golang) | `6969` | Menampilkan Teks: "Golang geming!" | `ALLOW` |
+
+---
+
+## 🛡️ 1. Konfigurasi UFW Firewall
+
+Sebelum atau setelah aplikasi dijalankan, pastikan UFW Firewall aktif dan membuka port-port yang diperlukan agar semua aplikasi dapat diakses melalui browser client.
+
+```bash
+# 1. Izinkan Port SSH agar koneksi remote tidak terputus
+sudo ufw allow 22/tcp comment 'SSH'
+
+# 2. Izinkan Port Aplikasi (3000, 5000, 6969)
+sudo ufw allow 3000/tcp comment 'NodeJS Wayshub'
+sudo ufw allow 5000/tcp comment 'Python App'
+sudo ufw allow 6969/tcp comment 'Golang App'
+
+# 3. Aktifkan Firewall
+sudo ufw enable
+
+# 4. Verifikasi status port
+sudo ufw status numbered
+```
+
+---
+
+## 🟢 2. Deploy Application 1: NodeJS (Wayshub Frontend)
+
+Aplikasi ini memerlukan versi NodeJS lama (v10 / v12). Kita akan menggunakan **NVM (Node Version Manager)** untuk mengisolasi versi NodeJS.
+
+### Langkah-langkah Deployment:
+```bash
+# 1. Install NVM (Node Version Manager)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+source ~/.bashrc
+
+# 2. Install dan Gunakan NodeJS v12 (atau v10)
+nvm install 12
+nvm use 12
+
+# 3. Clone Repositori Wayshub Frontend
+git clone https://github.com/dumbwaysdev/wayshub-frontend.git
+cd wayshub-frontend
+
+# 4. Install Dependencies & Build
+npm install
+
+# 5. Jalankan Aplikasi di Port 3000 (Gunakan PM2 agar berjalan di Background)
+npm install -g pm2
+pm2 start npm --name "wayshub-frontend" -- start -- -p 3000
+pm2 save
+```
+
+* **Pengujian**: Buka browser dan akses `http://192.168.4.208:3000`
+
+---
+
+## 🐍 3. Deploy Application 2: Python (Flask App)
+
+Aplikasi Python Sederhana yang menampilkan nama Anda dan berjalan di port 5000.
+
+### Langkah-langkah Deployment:
+```bash
+# 1. Install Python & Virtual Environment
+sudo apt update && sudo apt install -y python3 python3-pip python3-venv
+
+# 2. Buat Direktori Proyek
+mkdir -p ~/apps/python-app && cd ~/apps/python-app
+
+# 3. Buat file app.py
+cat << 'EOF' > app.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "<h1>Hello, Nama Saya: [NAMA KALIAN]</h1>"
+
+if __name__ == '__main__':
+    # Running di port 5000 pada semua interface (0.0.0.0)
+    app.run(host='0.0.0.0', port=5000)
+EOF
+
+# 4. Buat Virtual Environment & Install Flask
+python3 -m venv venv
+source venv/bin/activate
+pip install flask
+
+# 5. Jalankan Python App di Background (PM2)
+pm2 start "python3 app.py" --name "python-app"
+```
+
+* **Pengujian**: Buka browser dan akses `http://192.168.4.208:5000`
+
+---
+
+## 🦫 4. Deploy Application 3: Golang App
+
+Aplikasi Golang sederhana yang menampilkan teks `"Golang geming!"`.
+
+### Langkah-langkah Deployment:
+```bash
+# 1. Install Golang Compiler
+sudo apt install -y golang-go
+
+# 2. Buat Direktori Proyek
+mkdir -p ~/apps/golang-app && cd ~/apps/golang-app
+
+# 3. Buat file main.go
+cat << 'EOF' > main.go
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Golang geming!")
+}
+
+func main() {
+    http.HandleFunc("/", handler)
+    fmt.Println("Server Running on port 6969...")
+    http.ListenAndServe(":6969", nil)
+}
+EOF
+
+# 4. Build Binary File Golang
+go build -o golang-app main.go
+
+# 5. Jalankan Binary Golang dengan PM2
+pm2 start ./golang-app --name "golang-app"
+```
+
+* **Pengujian**: Buka browser dan akses `http://192.168.4.208:6969`
+
+---
+
+## 🔍 Verifikasi Akhir Seluruh Service
+
+Jalankan perintah berikut untuk memastikan ketiga aplikasi berjalan stabil di background:
+
+```bash
+# Cek status PM2 Process List
+pm2 list
+
+# Cek listener port aktif
+ss -tulnp | grep -E '3000|5000|6969'
+```
