@@ -624,3 +624,172 @@ pm2 list
 # Cek listener port aktif
 ss -tulnp | grep -E '3000|5000|6969'
 ```
+
+# Task 6
+## 1. Arsitektur & Cara Kerja Reverse Proxy
+
+### Topologi / Diagram Struktur Web Server
+
+```text
+                                +-----------------------------------+
+                                |          Ubuntu Server            |
+                                |          (192.168.4.208)          |
+                                |                                   |
+[ User / Browser ]              |   +---------------------------+   |
+        |                       |   |     Nginx Reverse Proxy   |   |
+        |--- ( HTTP Port 80 ) ----->|   |     (Port 80 / 443)     |   |
+        |                       |   +-------------+-------------+   |
+        |                       |                 |                 |
+        v                       |     +-----------+-----------+     |
+  http://bule.xyz --------------+---->|  Proxy Pass Rules     |     |
+                                |     +-----+-----+-----+-----+     |
+                                |           |     |     |           |
+                                |  +--------+     |     +--------+  |
+                                |  v              v              v  |
+                                | [Wayshub]   [Python]       [Golang]|
+                                | Port 3000   Port 5000      Port 6969
+                                +-----------------------------------+
+```
+
+### Cara Kerja Reverse Proxy
+1. **Request dari Client**: Pengguna mengakses alamat domain (misalnya `http://bule.xyz` atau `http://app.bule.xyz`) melalui web browser.
+2. **Penerimaan oleh Nginx**: Nginx yang bertindak sebagai Reverse Proxy menerima request masuk di **Port 80** (HTTP) atau **Port 443** (HTTPS).
+3. **Pencocokan Host/Path**: Nginx memeriksa konfigurasi `server_name` atau `location` untuk menentukan aplikasi tujuan.
+4. **Proxy Pass (Internal Redirection)**: Nginx meneruskan (*forward*) request tersebut ke port aplikasi internal yang sesuai (`127.0.0.1:3000` untuk Wayshub, `127.0.0.1:5000` untuk Python, `127.0.0.1:6969` untuk Golang).
+5. **Respons ke Client**: Aplikasi memproses request dan mengirimkan respons kembali ke Nginx, lalu Nginx menyampaikannya kembali ke browser pengguna. Client tidak mengetahui port internal tempat aplikasi sebenarnya berjalan.
+
+---
+
+## 2. Implementasi Reverse Proxy dengan Nginx
+
+### Langkah A: Instalasi Nginx Web Server
+Jalankan perintah berikut pada Ubuntu Server Anda:
+
+```bash
+sudo apt update
+sudo apt install -y nginx
+sudo systemctl enable --now nginx
+```
+
+---
+
+### Langkah B: Konfigurasi Virtual Host / Reverse Proxy
+
+Buat file konfigurasi server block baru untuk domain Anda (contoh menggunakan domain `bule.xyz`):
+
+```bash
+sudo nano /etc/nginx/sites-available/bule.xyz
+```
+
+Isikan konfigurasi Nginx di bawah ini:
+
+```nginx
+# 1. Konfigurasi Domain Utama (Wayshub Frontend - Port 3000)
+server {
+    listen 80;
+    server_name bule.xyz www.bule.xyz;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# 2. Konfigurasi Subdomain Python App (Port 5000)
+server {
+    listen 80;
+    server_name python.bule.xyz;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# 3. Konfigurasi Subdomain Golang App (Port 6969)
+server {
+    listen 80;
+    server_name golang.bule.xyz;
+
+    location / {
+        proxy_pass http://127.0.0.1:6969;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+---
+
+### Langkah C: Aktivasi Konfigurasi & Reload Nginx
+
+1. **Buat Symlink** ke direktori `sites-enabled`:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/bule.xyz /etc/nginx/sites-enabled/
+   ```
+
+2. **Uji Sintaks Konfigurasi**:
+   ```bash
+   sudo nginx -t
+   ```
+   *Pastikan muncul pesan `syntax is ok` dan `test is successful`.*
+
+3. **Reload Nginx Service**:
+   ```bash
+   sudo systemctl reload nginx
+   ```
+
+---
+
+### Langkah D: Setting Local Local DNS / Hosts File (Untuk Pengujian Local Domain)
+
+Jika domain `bule.xyz` belum dibeli secara publik, petakan IP server (`192.168.4.208`) ke nama domain pada komputer client Anda:
+
+* **Windows**: Edit file `C:\Windows\System32\drivers\etc\hosts` (Buka dengan Administrator)
+* **Linux/MacOS**: Edit file `/etc/hosts`
+
+Tambahkan baris berikut:
+```text
+192.168.4.208    bule.xyz www.bule.xyz
+192.168.4.208    python.bule.xyz
+192.168.4.208    golang.bule.xyz
+```
+
+---
+
+### Langkah E: Update UFW Firewall Rules
+
+Karena trafik HTTP kini dipusatkan melalui Nginx pada **Port 80**, pastikan port 80 telah diizinkan pada UFW Firewall:
+
+```bash
+# Izinkan HTTP & HTTPS Nginx Profile
+sudo ufw allow 'Nginx Full'
+
+# Aktifkan UFW
+sudo ufw enable
+
+# Cek Status Firewall
+sudo ufw status
+```
+
+---
+
+## 🔍 Pengujian Reverse Proxy melalui Browser
+
+Buka browser komputer client dan akses domain berikut tanpa menyebutkan nomor port:
+
+* **Wayshub Frontend**: `http://bule.xyz`
+* **Python App**: `http://python.bule.xyz`
+* **Golang App**: `http://golang.bule.xyz`
