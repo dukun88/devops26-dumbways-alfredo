@@ -467,7 +467,7 @@ Berikut cara melihat riwayat dan detail perubahan isi file di GitHub:
 3. GitHub akan menampilkan siapa yang menulis setiap baris kode, kapan perubahan dilakukan, beserta id commit terkait.
 
 # Task 5
-## 📋 Ringkasan Deployment & Port
+## Ringkasan Deployment & Port
 
 | Aplikasi | Runtime / Framework | Port | Deskripsi / Output | Status UFW |
 | :--- | :--- | :--- | :--- | :--- |
@@ -477,7 +477,7 @@ Berikut cara melihat riwayat dan detail perubahan isi file di GitHub:
 
 ---
 
-## 🛡️ 1. Konfigurasi UFW Firewall
+## 1. Konfigurasi UFW Firewall
 
 Sebelum atau setelah aplikasi dijalankan, pastikan UFW Firewall aktif dan membuka port-port yang diperlukan agar semua aplikasi dapat diakses melalui browser client.
 
@@ -499,7 +499,7 @@ sudo ufw status numbered
 
 ---
 
-## 🟢 2. Deploy Application 1: NodeJS (Wayshub Frontend)
+## 2. Deploy Application 1: NodeJS (Wayshub Frontend)
 
 Aplikasi ini memerlukan versi NodeJS lama (v10 / v12). Kita akan menggunakan **NVM (Node Version Manager)** untuk mengisolasi versi NodeJS.
 
@@ -530,7 +530,7 @@ pm2 save
 
 ---
 
-## 🐍 3. Deploy Application 2: Python (Flask App)
+## 3. Deploy Application 2: Python (Flask App)
 
 Aplikasi Python Sederhana yang menampilkan nama Anda dan berjalan di port 5000.
 
@@ -570,7 +570,7 @@ pm2 start "python3 app.py" --name "python-app"
 
 ---
 
-## 🦫 4. Deploy Application 3: Golang App
+## 4. Deploy Application 3: Golang App
 
 Aplikasi Golang sederhana yang menampilkan teks `"Golang geming!"`.
 
@@ -613,7 +613,7 @@ pm2 start ./golang-app --name "golang-app"
 
 ---
 
-## 🔍 Verifikasi Akhir Seluruh Service
+## Verifikasi Akhir Seluruh Service
 
 Jalankan perintah berikut untuk memastikan ketiga aplikasi berjalan stabil di background:
 
