@@ -373,3 +373,95 @@ To                         Action      From
 [ 5] 5000/tcp                   ALLOW IN    Anywhere                   # Flask / Python App
 [ 6] 6969/tcp                   ALLOW IN    Anywhere                   # Custom Service
 ```
+
+# Task 4
+
+## 1. Penjelasan Singkat tentang Git
+
+**Git** adalah sistem pengontrol versi terdistribusi (*Distributed Version Control System / DVCS*) yang digunakan untuk melacak perubahan pada kode sumber atau berkas selama proses pengembangan perangkat lunak. 
+
+* **Kelebihan Utama Git**:
+  - **Terdistribusi**: Setiap *developer* memiliki salinan penuh dari seluruh riwayat proyek secara lokal.
+  - **Branching & Merging Cepat**: Memudahkan pengerjaan fitur baru tanpa mengganggu kode utama (*main/master*).
+  - **Lacak Perubahan**: Memungkinkan rollback ke versi sebelumnya jika terjadi bug atau kesalahan.
+
+---
+
+## 2 & 3. Membuat & Mengelola Repositori via Terminal
+
+### Langkah A: Inisialisasi Repositori Lokal
+Buka terminal Anda dan jalankan perintah berikut (ganti `<nama>` dengan nama Anda):
+
+```bash
+# 1. Buat direktori proyek baru
+mkdir devops26-dumbways-nama
+cd devops26-dumbways-nama
+
+# 2. Inisialisasi Git pada direktori
+git init
+```
+
+### Langkah B: Membuat 3 Berkas Teks
+Buat 3 berkas teks di dalam direktori repositori:
+
+```bash
+# Membuat file 1
+echo "Ini adalah file konfigurasi utama proyek DevOps." > config.txt
+
+# Membuat file 2
+echo "Dokumentasi aplikasi dan panduan instalasi." > README.md
+
+# Membuat file 3
+echo "Daftar repositori & dependencies aplikasi." > app.txt
+```
+
+### Langkah C: Menambahkan & Melakukan Commit Berkas
+```bash
+# 1. Cek status repositori (akan menampilkan file untracked)
+git status
+
+# 2. Tambahkan ketiga file ke Staging Area
+git add .
+
+# 3. Simpan perubahan ke dalam riwayat Git (Commit)
+git commit -m "feat: initial commit add 3 text files"
+```
+
+### Langkah D: Menghubungkan ke GitHub Remote & Push
+1. Buat repositori baru di GitHub dengan nama **`devops26-dumbways-<nama>`** (kosongkan opsi *Initialize with README*).
+2. Hubungkan repositori lokal ke GitHub dan unggah (*push*) kodenya:
+
+```bash
+# Ubah nama branch utama ke main
+git branch -M main
+
+# Hubungkan ke remote GitHub (ganti username dengan username GitHub Anda)
+git remote add origin https://github.com/username/devops26-dumbways-nama.git
+
+# Unggah seluruh perubahan ke GitHub
+git push -u origin main
+```
+
+---
+
+## 4. Cara Mencari & Memantau Perubahan Teks (Diff) di GitHub
+
+Berikut cara melihat riwayat dan detail perubahan isi file di GitHub:
+
+### A. Melihat Seluruh Perubahan Berdasarkan Commit (*Commit History*)
+1. Buka halaman repositori **`devops26-dumbways-<nama>`** di GitHub.
+2. Klik tombol **Commits** (ikon jam di atas daftar file).
+3. Klik pada **Pesan Commit** (contoh: `feat: initial commit...`).
+4. GitHub akan menampilkan tampilan *Diff*:
+   - Teks berwarna **Hijau (`+`)**: Penambahan teks baru.
+   - Teks berwarna **Merah (`-`)**: Teks yang dihapus atau diubah.
+
+### B. Melihat Riwayat Perubahan pada File Spesifik (*File History*)
+1. Buka file yang ingin dicek (misalnya `README.md`).
+2. Klik tombol **History** di pojok kanan atas tampilan file.
+3. Anda akan melihat daftar commit khusus yang pernah mengubah file tersebut.
+
+### C. Menggunakan Fitur **Blame** untuk Mengetahui Pembuat Perubahan
+1. Buka file yang dituju (misal: `config.txt`).
+2. Klik tombol **Blame**.
+3. GitHub akan menampilkan siapa yang menulis setiap baris kode, kapan perubahan dilakukan, beserta id commit terkait.
