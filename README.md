@@ -95,3 +95,130 @@ Jalankan perintah pengujian koneksi:
   ping -c 4 google.com
   ```
   *Output yang diharapkan:* Server mampu menyelesaikan nama domain `google.com` ke IP address dan menerima balasan paket.
+
+# Task 2
+## 1. Diagram Jaringan Komputer (4 Devices)
+
+### Spesifikasi Jaringan
+- **IP Class**: Class C
+- **CIDR Block**: `192.168.4.0/24`
+- **Subnet Mask**: `255.255.255.0`
+- **Network ID**: `192.168.4.0`
+- **Broadcast ID**: `192.168.4.255`
+- **Usable IP Range**: `192.168.4.1` – `192.168.4.254`
+
+### Topologi Jaringan (Star Topology)
+
+```text
+                        +--------------------+
+                        |   Switch / Router  |
+                        |   (192.168.4.1)    |
+                        +---------+----------+
+                                  |
+         +----------------+-------+-------+----------------+
+         |                |               |                |
+         v                v               v                v
+  +--------------+ +--------------+ +--------------+ +--------------+
+  |   PC-01      | |   PC-02      | |   PC-03      | |   PC-04      |
+  |              | |              | |              | |              |
+  | IP:          | | IP:          | | IP:          | | IP:          |
+  | 192.168.4.10 | | 192.168.4.11 | | 192.168.4.12 | | 192.168.4.13 |
+  | Mask:        | | Mask:        | | Mask:        | | Mask:        |
+  | /24          | | /24          | | /24          | | /24          |
+  +--------------+ +--------------+ +--------------+ +--------------+
+```
+
+### Tabel Konfigurasi Perangkat
+
+| Nama Perangkat | Peran / Fungsi | IP Address | Subnet Mask | Default Gateway |
+| :--- | :--- | :--- | :--- | :--- |
+| **Router / Gateway** | `192.168.4.1` | `255.255.255.0` | N/A |
+| **PC-01** | `192.168.4.10` | `255.255.255.0` | `192.168.4.1` |
+| **PC-02** | `192.168.4.11` | `255.255.255.0` | `192.168.4.1` |
+| **PC-03** | `192.168.4.12` | `255.255.255.0` | `192.168.4.1` |
+| **PC-04** | `192.168.4.13` | `255.255.255.0` | `192.168.4.1` |
+
+---
+
+## 2. Perbedaan SH (Shell) dan BASH (Bourne-Again Shell)
+
+| Fitur / Karakteristik | SH (Bourne Shell) | BASH (Bourne-Again Shell) |
+| :--- | :--- | :--- |
+| **Pengertian** | Shell standar UNIX asli yang dikembangkan oleh Stephen Bourne di Bell Labs (1979). | Pengembangan/superset modern dari `sh` yang dikembangkan oleh Brian Fox untuk GNU Project (1989). |
+| **Lokasi Biner** | Biasanya berada di `/bin/sh` (pada OS modern sering berupa *symlink* ke `dash` atau `bash`). | Terletak di `/bin/bash` atau `/usr/bin/bash`. |
+| **Fitur Sintaks** | Sangat minimalis, berfokus pada portabilitas dan kesederhanaan standar POSIX. | Memiliki fitur sintaks lanjutan (array, manipulasi string, ekspresi reguler, dll). |
+| **Fitur Interaktif** | Tidak ada *command history*, *auto-completion* (tabbing) sangat terbatas atau tidak ada. | Mendukung *command completion* (Tab), *history search* (Ctrl+R), dan alias. |
+| **Array & Loop** | Tidak mendukung array secara *native*. | Mendukung *one-dimensional indexing* dan *associative arrays*. |
+| **Pengujian Kondisi** | Hanya mendukung sintaks standar `[ condition ]`. | Mendukung `[[ condition ]]` yang lebih aman dan fleksibel. |
+| **Skrip Prompt** | Menggunakan `#!/bin/sh` | Menggunakan `#!/bin/bash` |
+
+---
+
+## 3. Dokumentasi Kumpulan Perintah Linux (Linux Command Reference)
+
+Berikut dokumentasi perintah Linux yang terbagi berdasarkan kategori fungsionalitasnya:
+
+### A. Navigasi & Manajemen File/Direktori
+- `ls -la`: Menampilkan seluruh file dan direktori termasuk yang tersembunyi (*dotfiles*) beserta detail hak aksesnya.
+- `pwd`: Menampilkan direktori kerja saat ini (*Print Working Directory*).
+- `cd /path/to/dir`: Pindah ke direktori tujuan.
+- `mkdir -p dir1/dir2`: Membuat direktori baru (secara rekursif jika belum ada parent directory).
+- `cp -r source/ destination/`: Menyalin file/folder secara rekursif.
+- `mv file1.txt /new/location/`: Memindahkan atau mengubah nama file/folder.
+- `rm -rf dir_name`: Menghapus file/direktori secara paksa dan rekursif.
+- `touch filename`: Membuat file kosong baru atau memperbarui timestamp file.
+- `tree`: Menampilkan struktur direktori dalam bentuk pohon grafis.
+
+### B. Pemrosesan Teks & Pencarian File
+- `cat file.txt`: Menampilkan seluruh isi file ke terminal.
+- `less file.txt` / `more file.txt`: Menampilkan isi file besar halaman per halaman.
+- `head -n 20 file.txt` / `tail -n 20 file.txt`: Menampilkan 20 baris pertama atau terakhir dari sebuah file.
+- `grep -rnw '/path/' -e 'search_term'`: Mencari string/teks tertentu secara rekursif di seluruh file dalam direktori.
+- `find /path -name "*.log" -type f`: Mencari file berdasarkan nama, tipe, ukuran, atau waktu modifikasi.
+- `awk '{print $1}' file.txt`: Bahasa pemrosesan teks untuk manipulasi kolom data.
+- `sed -i 's/old/new/g' file.txt`: Stream editor untuk mengganti teks langsung di dalam file.
+- `wc -l file.txt`: Menghitung jumlah baris, kata, atau karakter dalam file.
+
+### C. Manajemen Hak Akses & Pengguna (Permissions & Users)
+- `chmod 755 script.sh`: Mengubah hak akses file (Read, Write, Execute untuk User/Group/Others).
+- `chown user:group filename`: Mengubah pemilik (*owner*) dan grup dari sebuah file/direktori.
+- `useradd -m -s /bin/bash newuser`: Membuat pengguna baru beserta direktori home dan shell default.
+- `usermod -aG sudo newuser`: Menambahkan pengguna ke grup tertentu (misalnya grup sudoers).
+- `passwd username`: Mengubah kata sandi pengguna.
+- `visudo`: Mengedit file konfigurasi `/etc/sudoers` dengan aman.
+
+### D. Manajemen Proses, Memori, & Sistem
+- `ps aux`: Menampilkan seluruh proses aktif di sistem.
+- `top` / `htop`: Monitoring penggunaan CPU, RAM, dan proses sistem secara *real-time* (interaktif).
+- `kill -9 <PID>` / `killall <process_name>`: Menghentikan proses berdasarkan PID atau nama proses secara paksa.
+- `free -h`: Menampilkan penggunaan memori RAM dan Swap dalam format *human-readable*.
+- `df -h`: Menampilkan penggunaan ruang disk (*Disk Free*) pada filesystem.
+- `du -sh /path/to/dir`: Menampilkan ukuran total penggunaan disk oleh suatu folder (*Disk Usage*).
+- `systemctl status/start/stop/restart/enable <service>`: Mengelola *systemd service*/daemons.
+- `journalctl -u service_name -f`: Melihat log sistem/service secara *real-time*.
+
+### E. Jaringan & Komunikasi (Networking)
+- `ip a` / `ip route`: Menampilkan informasi interface jaringan dan tabel routing.
+- `ping -c 4 google.com`: Menguji konektivitas ke host/IP tujuan.
+- `netstat -tulnp` / `ss -tulnp`: Menampilkan port jaringan yang sedang terbuka/listening beserta PID prosesnya.
+- `curl -I https://example.com`: Mengirim request HTTP/HTTPS dan menampilkan header respon server.
+- `wget https://domain.com/file.zip`: Mengunduh file langsung dari web melalui terminal.
+- `traceroute 8.8.8.8` / `mtr 8.8.8.8`: Menelusuri rute/hop jaringan menuju host tujuan.
+- `dig domain.com` / `nslookup domain.com`: Melakukan kueri DNS lookup untuk menganalisis record domain.
+- `ssh user@host -p 22`: Melakukan koneksi remote aman via Secure Shell.
+- `scp -P 22 file.txt user@host:/path/`: Menyalin file antar host jaringan secara aman via SSH.
+- `rsync -avzP source/ user@host:/destination/`: Sinkronisasi data antar direktori/server efisien dan dapat di-resume.
+
+### F. Perintah Linux Lanjutan & Tools Tambahan (Advanced/Pro Tools) 🔥
+*(Command lanjutan diluar materi dasar)*
+
+- `tmux` / `screen`: Terminal multiplexer yang memungkinkan Anda menjalankan banyak sesi terminal dalam satu jendela dan menjaga proses tetap berjalan di background saat koneksi SSH terputus.
+- `nc -zv <host> <port>` (*Netcat*): Alat Swiss-Army Knife untuk jaringan; digunakan untuk melakukan scan/test konektivitas port TCP/UDP spesifik.
+- `tcpdump -i eth0 -n vlan`: Sniffer paket jaringan langsung dari terminal untuk analisa lalu lintas data.
+- `nmap -sS -p 1-1024 <IP>`: Network mapper & port scanner mendalam untuk memindai port terbuka dan deteksi OS.
+- `strace -p <PID>`: Melacak *system calls* dan signal yang diterima oleh suatu proses Linux untuk debugging masalah aplikasi.
+- `lsof -i :80`: Menampilkan daftar file dan koneksi socket yang sedang dibuka oleh port atau proses tertentu.
+- `iotop`: Monitoring I/O pembacaan/penulisan harddisk per proses secara *real-time*.
+- `lsblk -f`: Menampilkan struktur dan hierarki blok penyimpanan (disk & partisi) beserta sistem filenya.
+- `uptime`: Menampilkan berapa lama sistem telah menyala beserta beban rata-rata (*load average*).
+- `dmesg -T`: Menampilkan pesan kernel/hardware buffer sistem dengan timestamp terformat.
