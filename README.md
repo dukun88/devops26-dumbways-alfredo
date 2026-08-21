@@ -222,3 +222,154 @@ Berikut dokumentasi perintah Linux yang terbagi berdasarkan kategori fungsionali
 - `lsblk -f`: Menampilkan struktur dan hierarki blok penyimpanan (disk & partisi) beserta sistem filenya.
 - `uptime`: Menampilkan berapa lama sistem telah menyala beserta beban rata-rata (*load average*).
 - `dmesg -T`: Menampilkan pesan kernel/hardware buffer sistem dengan timestamp terformat.
+
+# Task 3
+## 1. Akses Server Menggunakan Terminal
+
+Untuk terhubung ke Ubuntu Server via SSH dari komputer lokal (*Windows Terminal / PowerShell / Linux Terminal*):
+
+```bash
+ssh username@192.168.4.208
+```
+*(Ganti `username` dan alamat IP sesuai dengan konfigurasi server Anda).*
+
+---
+
+## 2. Konfigurasi SSH Key-Based Authentication
+
+### Langkah A: Buat SSH Key Pair di Komputer Lokal (Client)
+Jalankan perintah berikut di terminal komputer lokal Anda:
+```bash
+ssh-keygen -t ed25519 -C "admin-key"
+```
+* Tekan **Enter** untuk menyimpan di lokasi default (`~/.ssh/id_ed25519`).
+* Masukkan passphrase jika ingin keamanan ekstra (opsional).
+
+### Langkah B: Salin Public Key ke Server
+Gunakan perintah `ssh-copy-id` untuk mengirimkan Public Key ke server:
+```bash
+ssh-copy-id username@192.168.4.208
+```
+
+### Langkah C: Matikan Otentikasi Password di Server (Opsional/Rekomendasi Keamanan)
+Login ke server, lalu buka dan edit file konfigurasi SSH Daemon (`sshd_config`):
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+Ubah/pastikan baris parameter berikut diset sebagai berikut:
+```ini
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+```
+Simpan file (`Ctrl+O` lalu `Enter`), lalu keluar (`Ctrl+X`).
+
+Terapkan konfigurasi baru dengan merestart service SSH:
+```bash
+sudo systemctl restart ssh
+```
+
+---
+
+## 3. Step-by-Step Penggunaan Text Manipulation (`echo`, `cat`, `grep`, `sed`)
+
+Berikut alur praktikum manipulasi teks di terminal Linux:
+
+### Langkah 1: Membuat & Menambah Teks dengan `echo`
+* **Membuat file baru:**
+  ```bash
+  echo "Server status: ACTIVE" > app.log
+  ```
+* **Menambahkan baris baru ke file tanpa menimpa (*append*):**
+  ```bash
+  echo "Error 404: Page not found on /api/v1/user" >> app.log
+  echo "INFO: User admin logged in successfully" >> app.log
+  echo "Error 500: Database connection timeout on /api/v1/db" >> app.log
+  ```
+
+### Langkah 2: Menampilkan Isi File dengan `cat`
+* **Menampilkan seluruh isi file:**
+  ```bash
+  cat app.log
+  ```
+* **Menampilkan isi file lengkap dengan nomor baris:**
+  ```bash
+  cat -n app.log
+  ```
+
+### Langkah 3: Mencari & Memfilter Teks dengan `grep`
+* **Mencari kata tertentu (misal: "Error"):**
+  ```bash
+  grep "Error" app.log
+  ```
+* **Mencari teks tanpa memedulikan huruf besar/kecil (*case-insensitive*):**
+  ```bash
+  grep -i "info" app.log
+  ```
+* **Mencari baris yang TIDAK mengandung kata tertentu (*invert match*):**
+  ```bash
+  grep -v "Error" app.log
+  ```
+
+### Langkah 4: Mengubah/Mengganti Teks dengan `sed`
+* **Mengganti kata di layar saja (tanpa mengubah file asli):**
+  ```bash
+  sed 's/ACTIVE/RUNNING/' app.log
+  ```
+* **Mengganti kata dan langsung menyimpan ke file asli (*In-place editing*):**
+  ```bash
+  sed -i 's/Error 500/CRITICAL 500/g' app.log
+  ```
+* **Menghapus baris tertentu (misal: menghapus baris yang memuat kata "404"):**
+  ```bash
+  sed -i '/404/d' app.log
+  ```
+
+---
+
+## 4. Konfigurasi UFW (Uncomplicated Firewall)
+
+Aktifkan firewall di server dan buka port-port berikut: `22` (SSH), `80` (HTTP), `443` (HTTPS), `3000` (Node.js/React), `5000` (Flask/Python), dan `6969` (Custom App).
+
+### Langkah A: Izinkan Port-Port yang Ditentukan
+Jalankan perintah berikut satu per satu:
+
+```bash
+# Izinkan Port 22 (SSH - Wajib agar koneksi remote tidak terputus)
+sudo ufw allow 22/tcp comment 'SSH Remote Access'
+
+# Izinkan Port 80 & 443 (Web Server)
+sudo ufw allow 80/tcp comment 'HTTP Web'
+sudo ufw allow 443/tcp comment 'HTTPS Secure Web'
+
+# Izinkan Port Aplikasi (3000, 5000, 6969)
+sudo ufw allow 3000/tcp comment 'NodeJS / Dev App'
+sudo ufw allow 5000/tcp comment 'Flask / Python App'
+sudo ufw allow 6969/tcp comment 'Custom Service'
+```
+
+### Langkah B: Aktifkan UFW Firewall
+```bash
+sudo ufw enable
+```
+*Tekan `y` saat muncul konfirmasi.*
+
+### Langkah C: Cek Status & Verifikasi Rule Firewall
+```bash
+sudo ufw status numbered
+```
+
+**Output yang diharapkan:**
+```text
+Status: active
+
+To                         Action      From
+--                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere                   # SSH Remote Access
+[ 2] 80/tcp                     ALLOW IN    Anywhere                   # HTTP Web
+[ 3] 443/tcp                    ALLOW IN    Anywhere                   # HTTPS Secure Web
+[ 4] 3000/tcp                   ALLOW IN    Anywhere                   # NodeJS / Dev App
+[ 5] 5000/tcp                   ALLOW IN    Anywhere                   # Flask / Python App
+[ 6] 6969/tcp                   ALLOW IN    Anywhere                   # Custom Service
+```
